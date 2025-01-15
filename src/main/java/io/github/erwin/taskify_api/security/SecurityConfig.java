@@ -31,6 +31,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/register", "/api/auth/login").permitAll() // Public endpoints
                         .requestMatchers("/api/role/**").hasAuthority("ADMIN") // Only ADMIN can access role management endpoints
+                        .requestMatchers("/api/user/deleteUser").hasAuthority("ADMIN")
                         .anyRequest().authenticated() // All other endpoints require authentication
 
                 ).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));// Disable sessions
