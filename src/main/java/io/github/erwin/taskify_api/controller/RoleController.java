@@ -16,14 +16,10 @@ import org.springframework.web.bind.annotation.*;
 public class RoleController {
 
     private final RoleService roleService;
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
 
     @Autowired
-    public RoleController(RoleService roleService, UserRepository userRepository, RoleRepository roleRepository) {
+    public RoleController(RoleService roleService) {
         this.roleService = roleService;
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
     }
 
     @PostMapping("/add")
@@ -48,21 +44,12 @@ public class RoleController {
     }
 
     @PutMapping("/update-role/{username}")
-    public ResponseEntity<String> updateUserRole(@PathVariable String username, @RequestBody Role newRole, Authentication authentication) {
-        if (!authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to update roles!");
+    public ResponseEntity<String> updateUserRole(@PathVariable String username, @RequestBody Role newRole) {
+        try {
+            roleService.updateUserRole(username, newRole);
+            return ResponseEntity.ok("User role updated successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update user role");
         }
-
-        UserLogin userlogin = userRepository.findByUserName(username)
-                .orElseThrow(()->new RuntimeException("User Not Found!"));
-
-        Role role = roleRepository.findByRoleName(newRole.getRoleName())
-                .orElseThrow(() -> new RuntimeException("Role Not Found!"));
-
-        userlogin.getRoles().add(role);
-        userRepository.save(userlogin);
-
-        return ResponseEntity.ok("User role updated successfully!");
     }
-
 }

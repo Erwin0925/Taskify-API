@@ -4,14 +4,25 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
-    private final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
+    private final Key SECRET_KEY;
+
+    public JwtUtil() {
+        // Use a fixed secret key (base64-encoded for security)
+        String secret = "KjVnX7Ap1eNyz/P2LjF9U4XQzcGRtmcqXh7Irz/OwbI=";
+        byte[] decodedKey = Base64.getDecoder().decode(secret);
+        SECRET_KEY = new SecretKeySpec(decodedKey, 0, decodedKey.length, "HmacSHA256");
+    }
 
     public String generateToken(String username){
         return Jwts.builder()
